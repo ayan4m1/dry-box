@@ -4,16 +4,20 @@
 #include <WEMOS_SHT3X.h>
 
 #ifndef DEVICE_ID
-#error "DEVICE_ID is required!"
+#define DEVICE_ID ""
+#pragma warning "DEVICE_ID is required!"
 #endif
 #ifndef WIFI_SSID
-#error "WIFI_SSID is required!"
+#define WIFI_SSID ""
+#pragma warning "WIFI_SSID is required!"
 #endif
 #ifndef WIFI_PSK
-#error "WIFI_PSK is required!"
+#define WIFI_PSK ""
+#pragma warning "WIFI_PSK is required!"
 #endif
 #ifndef DISCORD_WEBHOOK_URL
-#error "DISCORD_WEBHOOK_URL is required!"
+#define DISCORD_WEBHOOK_URL ""
+#pragma warning "DISCORD_WEBHOOK_URL is required!"
 #endif
 
 #define DISCORD_WARNING_ICON "warning"
