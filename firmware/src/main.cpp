@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <Discord_WebHook.h>
+#include <ESP8266mDNS.h>
 #include <FastLED.h>
 #include <WEMOS_SHT3X.h>
 
@@ -33,10 +34,33 @@ bool alarmTripped;
 Discord_Webhook webhook;
 SHT3X sensor;
 
+String camelToSnake(String input) {
+  String result = "";
+
+  char c = tolower(input[0]);
+  result += char(c);
+
+  for (int i = 1; i < input.length(); i++) {
+    c = input[i];
+
+    if (isupper(c)) {
+      result = result + '_';
+      result += char(tolower(c));
+    } else {
+      result = result + c;
+    }
+  }
+
+  return result;
+}
+
 void setup() {
   webhook.begin(DISCORD_WEBHOOK_URL);
   webhook.addWiFi(WIFI_SSID, WIFI_PSK);
   webhook.connectWiFi();
+
+  MDNS.begin(camelToSnake(DEVICE_ID));
+  MDNS.addService("http", "tcp", 80);
 }
 
 void sendMessage(const float humidity, const char *icon) {
