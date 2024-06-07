@@ -3,12 +3,18 @@
 #include <FastLED.h>
 #include <WEMOS_SHT3X.h>
 
-#define DEVICE_ID "Bin 1"
-#define WIFI_SSID "qux"
-#define WIFI_PSK "wi9NNYara"
-#define DISCORD_WEBHOOK_URL                               \
-  "https://discord.com/api/webhooks/1247389183543218239/" \
-  "Duwl0KRroGvqmGav2_KbKhcQP18uYCo80jQtrsyFXe8s7OQ9TGBlGDrCdCjrGUqQ7gbK"
+#ifndef DEVICE_ID
+#error "DEVICE_ID is required!"
+#endif
+#ifndef WIFI_SSID
+#error "WIFI_SSID is required!"
+#endif
+#ifndef WIFI_PSK
+#error "WIFI_PSK is required!"
+#endif
+#ifndef DISCORD_WEBHOOK_URL
+#error "DISCORD_WEBHOOK_URL is required!"
+#endif
 
 #define DISCORD_WARNING_ICON "warning"
 #define DISCORD_ALERT_ICON "bangbang"
