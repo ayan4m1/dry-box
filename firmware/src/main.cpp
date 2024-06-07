@@ -1,29 +1,10 @@
-#ifndef DEVICE_ID
-#define DEVICE_ID ""
-#pragma warning "DEVICE_ID is required!"
-#endif
-
 #define USE_LITTLEFS true
 #define DOUBLERESETDETECTOR_DEBUG false
 #define USE_DYNAMIC_PARAMETERS true
 #define USING_BOARD_NAME false
-
-#define MAX_PERCENTAGE_LEN 3
-#define MAX_POLLING_RATE_LEN 5
-#define MAX_DISCORD_WEBHOOK_LEN 192
-
-char sensorPollingRate[MAX_POLLING_RATE_LEN + 1] = "120";
-char discordWebhookUrl[MAX_DISCORD_WEBHOOK_LEN + 1] = "";
-char humidityAlarmThreshold[MAX_PERCENTAGE_LEN + 1] = "60";
-char humidityWarningThreshold[MAX_PERCENTAGE_LEN + 1] = "40";
-
-MenuItem menuItems[] = {
-    {"hwt", "Warn %", humidityWarningThreshold, MAX_PERCENTAGE_LEN},
-    {"hat", "Alarm %", humidityAlarmThreshold, MAX_PERCENTAGE_LEN},
-    {"dwu", "Webhook URL", discordWebhookUrl, MAX_DISCORD_WEBHOOK_LEN},
-    {"spr", "Polling Rate", sensorPollingRate, MAX_POLLING_RATE_LEN}};
-
-uint16_t NUM_MENU_ITEMS = sizeof(menuItems) / sizeof(MenuItem);
+#define ESP_WM_LITE_DEBUG_OUTPUT Serial
+#define _ESP_WM_LITE_LOGLEVEL_ 3
+#define REQUIRE_ONE_SET_SSID_PW true
 
 #include <Arduino.h>
 #include <Discord_WebHook.h>
@@ -32,21 +13,53 @@ uint16_t NUM_MENU_ITEMS = sizeof(menuItems) / sizeof(MenuItem);
 #include <FastLED.h>
 #include <WEMOS_SHT3X.h>
 
+#ifndef DEVICE_ID
+#define DEVICE_ID ""
+#pragma warning "DEVICE_ID is required!"
+#endif
+
+#define WIFI_PSK "humidity"
+
 #define DISCORD_WARNING_ICON "warning"
 #define DISCORD_ALERT_ICON "bangbang"
 #define DISCORD_ERROR_ICON "no_entry_sign"
 #define DISCORD_CLEAR_ICON "white_check_mark"
 #define DISCORD_MSG_BUFFER 64
 
+// start dynamic params
+#define MAX_PERCENTAGE_LEN 3
+#define MAX_POLLING_RATE_LEN 5
+#define MAX_DISCORD_WEBHOOK_LEN 192
+
+bool LOAD_DEFAULT_CONFIG_DATA = false;
+ESP_WM_LITE_Configuration defaultConfig;
+
+char sensorPollingRate[MAX_POLLING_RATE_LEN + 1] = "120";
+char discordWebhookUrl[MAX_DISCORD_WEBHOOK_LEN + 1] = "";
+char humidityAlarmThreshold[MAX_PERCENTAGE_LEN + 1] = "60";
+char humidityWarningThreshold[MAX_PERCENTAGE_LEN + 1] = "40";
+
+MenuItem myMenuItems[] = {
+    {"hwt", "Warn %", humidityWarningThreshold, MAX_PERCENTAGE_LEN},
+    {"hat", "Alarm %", humidityAlarmThreshold, MAX_PERCENTAGE_LEN},
+    {"dwu", "Webhook URL", discordWebhookUrl, MAX_DISCORD_WEBHOOK_LEN},
+    {"spr", "Polling Rate", sensorPollingRate, MAX_POLLING_RATE_LEN}};
+
+uint16_t NUM_MENU_ITEMS = sizeof(myMenuItems) / sizeof(MenuItem);
+// end dynamic params
+
 SHT3X sensor;
-bool alarmTripped;
+bool alarmTripped = false;
 Discord_Webhook* webhook = new Discord_Webhook();
 ESP_WiFiManager_Lite* manager = new ESP_WiFiManager_Lite();
 
-String camelToSnake(String input) {
+// start utility functions
+
+String camelToSnake(const char* src) {
+  String input = String(src);
   String result = "";
 
-  auto c = tolower(input[0]);
+  char c = tolower(input[0]);
   result += char(c);
 
   for (int i = 1; i < input.length(); i++) {
@@ -60,14 +73,9 @@ String camelToSnake(String input) {
     }
   }
 
-  return result;
-}
+  result.replace(" ", "");
 
-void setup() {
-  manager->begin(camelToSnake(DEVICE_ID).c_str());
-  if (strlen(discordWebhookUrl) > 0) {
-    webhook->begin(discordWebhookUrl);
-  }
+  return result;
 }
 
 void sendMessage(const float humidity, const char* icon) {
@@ -86,28 +94,62 @@ void sendMessage(const float humidity, const char* icon) {
   }
 }
 
-void loop() {
-  uint16_t pollingRate = atoi(sensorPollingRate);
+void pollSensor() {
   uint8_t alarmThreshold = atoi(humidityAlarmThreshold);
   uint8_t warningThreshold = atoi(humidityWarningThreshold);
 
-  EVERY_N_MILLIS(pollingRate * 1e3) {
-    if (alarmTripped) {
-      return;
-    }
-
-    if (sensor.get() == 0) {
-      sendMessage(-1, nullptr);
-    }
-
-    if (sensor.humidity > alarmThreshold) {
-      alarmTripped = true;
-      sendMessage(sensor.humidity, DISCORD_ALERT_ICON);
-    } else if (sensor.humidity > warningThreshold) {
-      sendMessage(sensor.humidity, DISCORD_WARNING_ICON);
-    } else {
-      alarmTripped = false;
-      sendMessage(sensor.humidity, DISCORD_CLEAR_ICON);
-    }
+  if (alarmThreshold == 0 || warningThreshold == 0) {
+    Serial.println(F("Invalid thresholds, skipping poll!"));
+    return;
   }
+
+  Serial.println(F("Polling sensor..."));
+
+  if (sensor.get() != 0) {
+    sendMessage(-1, nullptr);
+    return;
+  }
+
+  Serial.printf("%.2f%% humidity\n", sensor.humidity);
+
+  if (sensor.humidity > alarmThreshold) {
+    alarmTripped = true;
+    sendMessage(sensor.humidity, DISCORD_ALERT_ICON);
+  } else if (sensor.humidity > warningThreshold) {
+    sendMessage(sensor.humidity, DISCORD_WARNING_ICON);
+  } else if (alarmTripped) {
+    alarmTripped = false;
+    sendMessage(sensor.humidity, DISCORD_CLEAR_ICON);
+  }
+}
+
+// end utility functions
+
+void setup() {
+  Serial.begin(115200);
+  Serial.println();
+
+  auto hostname = camelToSnake(DEVICE_ID);
+  Serial.printf("Startup using hostname %s\n", hostname.c_str());
+
+  manager->setConfigPortal(hostname, WIFI_PSK);
+  manager->begin(hostname.c_str());
+  if (strlen(discordWebhookUrl) > 0) {
+    webhook->begin(discordWebhookUrl);
+  }
+
+  Serial.println(F("Initialized"));
+  pollSensor();
+}
+
+void loop() {
+  manager->run();
+
+  uint16_t pollingRate = atoi(sensorPollingRate);
+
+  if (pollingRate == 0) {
+    return;
+  }
+
+  EVERY_N_SECONDS(pollingRate) { pollSensor(); }
 }

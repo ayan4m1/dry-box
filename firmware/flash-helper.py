@@ -8,7 +8,8 @@ if env.IsIntegrationDump():
 device_id = getenv('DEVICE_ID')
 
 if device_id is None:
-    Return()
+    print('What is the device ID?')
+    device_id = input()
 
 env.Append(
     CPPDEFINES=[
