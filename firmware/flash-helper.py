@@ -1,25 +1,23 @@
+import os
+
 Import('env')
 
 if env.IsIntegrationDump():
     Return()
 
-print(f'What is the device ID?')
-device_id = input()
+device_id = os.getenv('DEVICE_ID')
+wifi_ssid = os.getenv('WIFI_SSID')
+wifi_psk = os.getenv('WIFI_PSK')
+discord_webhook_url = os.getenv('DISCORD_WEBHOOK_URL')
 
-print('What is the WiFi SSID?')
-ssid = input()
-
-print('What is the WiFi PSK?')
-psk = input()
-
-print('What is the Discord webhook URL?')
-webhook_url = input()
+if device_id is None or wifi_ssid is None or wifi_psk is None or discord_webhook_url is None:
+    Return()
 
 env.Append(
     CPPDEFINES=[
         ('DEVICE_ID', env.StringifyMacro(device_id)),
-        ('WIFI_SSID', env.StringifyMacro(ssid)),
-        ('WIFI_PSK', env.StringifyMacro(psk)),
-        ('DISCORD_WEBHOOK_URL', env.StringifyMacro(webhook_url))
+        ('WIFI_SSID', env.StringifyMacro(wifi_ssid)),
+        ('WIFI_PSK', env.StringifyMacro(wifi_psk)),
+        ('DISCORD_WEBHOOK_URL', env.StringifyMacro(discord_webhook_url))
     ]
 )
