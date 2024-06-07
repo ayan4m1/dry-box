@@ -66,13 +66,11 @@ void loop() {
     }
 
     if (sensor.humidity > HUM_ALARM_THRESH) {
-      if (!alarmTripped) {
-        alarmTripped = true;
-      }
+      alarmTripped = true;
       sendMessage(sensor.humidity, DISCORD_ALERT_ICON);
     } else if (sensor.humidity > HUM_WARN_THRESH) {
       sendMessage(sensor.humidity, DISCORD_WARNING_ICON);
-    } else if (alarmTripped) {
+    } else {
       alarmTripped = false;
       sendMessage(sensor.humidity, DISCORD_CLEAR_ICON);
     }
