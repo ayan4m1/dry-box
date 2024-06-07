@@ -2,9 +2,10 @@
 #define DOUBLERESETDETECTOR_DEBUG false
 #define USE_DYNAMIC_PARAMETERS true
 #define USING_BOARD_NAME false
-#define ESP_WM_LITE_DEBUG_OUTPUT Serial
+// set to 0 to disable WiFiManager logging
 #define _ESP_WM_LITE_LOGLEVEL_ 3
 #define REQUIRE_ONE_SET_SSID_PW true
+#define USING_MRD false
 
 #include <Arduino.h>
 #include <Discord_WebHook.h>
@@ -27,6 +28,11 @@
 #define DISCORD_MSG_BUFFER 64
 
 // start dynamic params
+#define DEFAULT_POLLING_RATE "120"
+#define DEFAULT_WEBHOOK_URL ""
+#define DEFAULT_ALARM_THRESHOLD "60"
+#define DEFAULT_WARNING_THRESHOLD "40"
+
 #define MAX_PERCENTAGE_LEN 3
 #define MAX_POLLING_RATE_LEN 5
 #define MAX_DISCORD_WEBHOOK_LEN 192
@@ -34,16 +40,17 @@
 bool LOAD_DEFAULT_CONFIG_DATA = false;
 ESP_WM_LITE_Configuration defaultConfig;
 
-char sensorPollingRate[MAX_POLLING_RATE_LEN + 1] = "120";
-char discordWebhookUrl[MAX_DISCORD_WEBHOOK_LEN + 1] = "";
-char humidityAlarmThreshold[MAX_PERCENTAGE_LEN + 1] = "60";
-char humidityWarningThreshold[MAX_PERCENTAGE_LEN + 1] = "40";
+char sensorPollingRate[MAX_POLLING_RATE_LEN + 1] = DEFAULT_POLLING_RATE;
+char discordWebhookUrl[MAX_DISCORD_WEBHOOK_LEN + 1] = DEFAULT_WEBHOOK_URL;
+char humidityAlarmThreshold[MAX_PERCENTAGE_LEN + 1] = DEFAULT_ALARM_THRESHOLD;
+char humidityWarningThreshold[MAX_PERCENTAGE_LEN + 1] =
+    DEFAULT_WARNING_THRESHOLD;
 
 MenuItem myMenuItems[] = {
     {"hwt", "Warn %", humidityWarningThreshold, MAX_PERCENTAGE_LEN},
     {"hat", "Alarm %", humidityAlarmThreshold, MAX_PERCENTAGE_LEN},
-    {"dwu", "Webhook URL", discordWebhookUrl, MAX_DISCORD_WEBHOOK_LEN},
-    {"spr", "Polling Rate", sensorPollingRate, MAX_POLLING_RATE_LEN}};
+    {"dwu", "Discord Webhook", discordWebhookUrl, MAX_DISCORD_WEBHOOK_LEN},
+    {"spr", "Poll Rate (s)", sensorPollingRate, MAX_POLLING_RATE_LEN}};
 
 uint16_t NUM_MENU_ITEMS = sizeof(myMenuItems) / sizeof(MenuItem);
 // end dynamic params
@@ -139,7 +146,10 @@ void setup() {
   }
 
   Serial.println(F("Initialized"));
-  pollSensor();
+
+  if (!manager->isConfigMode()) {
+    pollSensor();
+  }
 }
 
 void loop() {
@@ -147,7 +157,7 @@ void loop() {
 
   uint16_t pollingRate = atoi(sensorPollingRate);
 
-  if (pollingRate == 0) {
+  if (pollingRate == 0 || manager->isConfigMode()) {
     return;
   }
 
