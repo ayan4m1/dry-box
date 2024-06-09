@@ -1,0 +1,33 @@
+name: Publish firmware releases
+on:
+  push:
+    tags:
+      - v*
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/pip
+            ~/.platformio/.cache
+          key: ${{ runner.os }}-pio
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+      - name: Install PlatformIO Core
+        run: pip install --upgrade platformio git-changelog
+      - name: Build PlatformIO Project
+        working-directory: ./firmware
+        run: pio run
+      - name: Generate changelog
+        run: git-changelog -B auto -n semver -o ${{ github.workspace }}-CHANGELOG.md
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: ${{ github.workspace }}-CHANGELOG.md
+          files: firmware/.pio/build/d1_mini/firmware.bin
