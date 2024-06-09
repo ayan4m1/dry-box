@@ -6,11 +6,15 @@ I wanted a setup that could keep at least 20 spools of filament in a low-humidit
 
 The Sterilite 20 quart gasket box was chosen because it is popular for this purpose and fits my basic needs - it fits 4 spools of 1kg filament with minimal wasted space and the lid is gasketed.
 
-I found a [spool holder design](https://www.printables.com/model/139303-sterilite-20-qt-gasket-box-spool-rack) on Printables by RCNet that uses 3/8" aluminum tubing, which can be bought in a coil and straightened, then cut to length and mounted between the endcaps to let four typical-size 1kg filament spools to rest vertically in the box.
+I found a [spool holder design](https://www.printables.com/model/139303-sterilite-20-qt-gasket-box-spool-rack) on Printables by RCNet that uses 3/8" aluminum tubing, which can be bought in a coil and straightened, then cut to length and mounted between the endcaps to let four typical-size 1kg filament spools rest vertically in the box.
 
-3A Molecular Sieve was chosen as the dessicant because it removes more water faster than silica gel. It does take more heat/time to dry it back out than silica gel, but this should not be an issue if you have enough molecular sieve to rotate it.
+3A Molecular Sieve was chosen as the dessicant because it removes more water, faster than silica gel. It does take more heat/time to dry it back out than silica gel, but this should not be an issue if you have enough molecular sieve to rotate it.
 
-I also wanted warnings/alarms for when the sieve granules needed changing, so the LOLIN D1 Mini was chosen as the microcontroller. They are cheap ($3.70 as of this writing), small, and fairly well designed. There is also an SHT30 shield for the D1 mini, which makes the sensor hookup simple. The SHT30 is a fairly accurate sensor (±2% RH) which will suffice for these purposes.
+I also wanted warnings/alarms for when the sieve granules needed changing, so the LOLIN D1 Mini was chosen as the microcontroller. They are cheap ($3.70 as of this writing), small, and fairly well designed.
+
+**Tangent:** The current draw of each ESP8266 in this application is estimated at 70mA (they observe "periodic spikes" which, based on their observations, add up to about 3mA of that total) based on [this research](https://www.ondrovo.com/a/20170207-esp-consumption/). This means that every six boxes consumes 420mA, or 50.4 watt-hours of energy a day - assuming I make no optimizations whatsoever to sleep in between polling periods. I could likely drop the average current for six sensors to 100mA with this optimization. They would then consume 22 times less power than my television's standby mode.
+
+There is also an SHT30 shield for the D1 mini, which makes the sensor hookup simple. The SHT30 is a fairly accurate sensor (±2% RH) which will suffice for these purposes.
 
 The firmware uses [ESP_WiFiManager_Lite](https://github.com/khoih-prog/ESP_WiFiManager_Lite) to simplify setup and configuration of the sensors. On first flashing, the sensor will go into Access Point mode with an SSID of `dry_box_1` and the password `drybox123`. Connect to it, then navigate to `http://192.168.4.1` in your browser. Set the WiFi credentials, device name, polling rate, humidity thresholds, and Discord webhook, then click Save. The device will reboot and start functioning. If you need to change configuration, "double-tap" the reset button on the microcontroller and wait a few seconds for a solid blue LED. This means that it is in Access Point mode again.
 
