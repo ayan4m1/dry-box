@@ -2,9 +2,17 @@
 
 I'm not the first person to do this, but I wanted to document my specific method in case others find it useful.
 
+I wanted a setup that could keep at least 20 spools of filament in a low-humidity (5-15%) environment.
+
 The Sterilite 20 quart gasket box was chosen because it is popular for this purpose and fits my basic needs - it fits 4 spools of 1kg filament with minimal wasted space and the lid is gasketed.
 
-The LOLIN D1 Mini was chosen as the microcontroller for the humidity sensor part of this project because they are cheap ($3.70 as of this writing), small, and fairly well designed. There is also an SHT30 shield for the D1 mini, which makes the sensor hookup simple. The SHT30 is a fairly accurate sensor (±2% RH) which will suffice for these purposes.
+I found a [spool holder design](https://www.printables.com/model/139303-sterilite-20-qt-gasket-box-spool-rack) on Printables by RCNet that uses 3/8" aluminum tubing, which can be bought in a coil and straightened, then cut to length and mounted between the endcaps to let four typical-size 1kg filament spools to rest vertically in the box.
+
+3A Molecular Sieve was chosen as the dessicant because it removes more water faster than silica gel. It does take more heat/time to dry it back out than silica gel, but this should not be an issue if you have enough molecular sieve to rotate it.
+
+I also wanted warnings/alarms for when the sieve granules needed changing, so the LOLIN D1 Mini was chosen as the microcontroller. They are cheap ($3.70 as of this writing), small, and fairly well designed. There is also an SHT30 shield for the D1 mini, which makes the sensor hookup simple. The SHT30 is a fairly accurate sensor (±2% RH) which will suffice for these purposes.
+
+The firmware uses [ESP_WiFiManager_Lite](https://github.com/khoih-prog/ESP_WiFiManager_Lite) to simplify setup and configuration of the sensors. On first flashing, the sensor will go into Access Point mode with an SSID of `dry_box_1` and the password `drybox123`. Connect to it, then navigate to `http://192.168.4.1` in your browser. Set the WiFi credentials, device name, polling rate, humidity thresholds, and Discord webhook, then click Save. The device will reboot and start functioning. If you need to change configuration, "double-tap" the reset button on the microcontroller and wait a few seconds for a solid blue LED. This means that it is in Access Point mode again.
 
 ## Bill of Materials
 
@@ -40,7 +48,7 @@ This will be cut to 325 mm (12.75 inch) sections to act as the spool holders.
 
 ### [3A Molecular Sieve](https://www.amazon.com/Wisesorb-Molecular-Desiccant-Dehumidifier-Absorbers/dp/B085W6TXJ8)
 
-Removes more water faster than silica gel, but takes more heat/time to dry it back out. The 2 pound size would provide for ~150 grams of sieve per box, in a six box setup.
+The 2 pound size would provide for ~150 grams of sieve per box, in a six box setup.
 
 ## Price Estimate
 
@@ -61,6 +69,7 @@ This is an estimate for a 24-spool, six box setup based on prices I paid in June
 ## Tools
 
  * Drill
+ * CA glue
  * Glue Gun
  * Soldering Iron
  * Wire Strippers (12-24 AWG)
@@ -71,6 +80,6 @@ This is an estimate for a 24-spool, six box setup based on prices I paid in June
 
 ## 3D Printed Parts
 
- * Endcaps for aluminum tubing (credit to [RCNet](https://www.printables.com/model/139303-sterilite-20-qt-gasket-box-spool-rack))
+ * Endcaps for aluminum tubing
  * Dessicant tray
  * Sensor mount
