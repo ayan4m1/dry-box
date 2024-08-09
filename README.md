@@ -4,7 +4,7 @@ I'm not the first person to do this, but I wanted to document my specific method
 
 I wanted a setup that could keep at least 20 spools of filament in a low-humidity (5-15%) environment.
 
-The Sterilite 20 quart gasket box was chosen because it is popular for this purpose and fits my basic needs - it fits 4 spools of 1kg filament with minimal wasted space and the lid is gasketed.
+The Sterilite 20 quart gasket box was chosen because it is popular for this purpose and fits my basic needs - it fits four 1kg spools of filament with minimal wasted space and the lid is gasketed to help keep moisture out.
 
 I found a [spool holder design](https://www.printables.com/model/139303-sterilite-20-qt-gasket-box-spool-rack) on Printables by RCNet that uses 3/8" aluminum tubing, which can be bought in a coil and straightened, then cut to length and mounted between the endcaps to let four typical-size 1kg filament spools rest vertically in the box.
 
@@ -12,9 +12,9 @@ I found a [spool holder design](https://www.printables.com/model/139303-sterilit
 
 I also wanted warnings/alarms for when the sieve granules needed changing, so the LOLIN D1 Mini was chosen as the microcontroller. They are cheap ($3.70 as of this writing), small, and fairly well designed.
 
-**Tangent:** The current draw of each ESP8266 in this application is estimated at 70mA (they observe "periodic spikes" which, based on their observations, add up to about 3mA of that total) based on [this research](https://www.ondrovo.com/a/20170207-esp-consumption/). This means that every six boxes consumes 420mA, or 50.4 watt-hours of energy a day - assuming I make no optimizations whatsoever to sleep in between polling periods. I could likely drop the average current for six sensors to 100mA with this optimization. They would then consume 22 times less power than my television's standby mode.
+**Energy Use Tangent:** The current draw of each ESP8266 in this application is estimated at 70mA based on [this research](https://www.ondrovo.com/a/20170207-esp-consumption/). That's 67mA continuously with "periodic spikes" which add up to an average of 3mA. This means that every six boxes consumes 420mA, or 50 Wh of energy a day (about $0.14/mo at my electricity prices) - assuming I make no optimizations whatsoever for the device to sleep in between polling periods. My television consumes ~260 Wh in standby mode every day. I could likely drop the average current for six sensors to 100mA with sleep optimizations. They would then consume 22 times less power than my television.
 
-There is also an SHT30 shield for the D1 mini, which makes the sensor hookup simple. The SHT30 is a fairly accurate sensor (±2% RH) which will suffice for these purposes.
+There is an SHT30 shield for the D1 mini, which provides our humidity sensing and is simple to socket onto the D1 mini. The SHT30 is a fairly accurate sensor (±2% RH) which will suffice for these purposes.
 
 The firmware uses [ESP_WiFiManager_Lite](https://github.com/khoih-prog/ESP_WiFiManager_Lite) to simplify setup and configuration of the sensors. On first flashing, the sensor will go into Access Point mode with an SSID of `dry_box_1` and the password `drybox123`. Connect to it, then navigate to `http://192.168.4.1` in your browser. Set the WiFi credentials, device name, polling rate, humidity thresholds, and Discord webhook, then click Save. The device will reboot and start functioning. If you need to change configuration, "double-tap" the reset button on the microcontroller and wait a few seconds for a solid blue LED. This means that it is in Access Point mode again.
 
@@ -30,7 +30,9 @@ The link above is the official LOLIN Aliexpress store. If this link becomes unav
 
 ### [USB-A to USB-C Cable](https://www.amazon.com/tekSonic-10-Pack-Type-C-Cables-Charge/dp/B0CG4GM7PM)
 
-You need one of these for each dry box, to power the sensor inside.
+You need one of these for each dry box, to power the sensor inside. You will be chopping the USB-C ends off of these, in order to get the wire through the hole in the box.
+
+The cables I got had fabric weave wrapping - this meant extra complexity because I had to trim the fraying ends and use CA glue to fix them in place 1-2 inches before the end of the USB cable. This gives enough room for stripping the wires later on.
 
 ### [USB-C Connector Breakout](https://www.amazon.com/ANMBEST-Connector-Receptacle-Adapter-Support/dp/B091CRLJM2)
 
@@ -54,9 +56,11 @@ This will be cut to 325 mm (12.75 inch) sections to act as the spool holders.
 
 The 2 pound size would provide for ~150 grams of sieve per box, in a six box setup.
 
+![graph showing molecular sieve taking about 15 minutes to dry to 15 percent RH](./images/graph.png)
+
 ## Price Estimate
 
-This is an estimate for a 24-spool, six box setup based on prices I paid in June 2024.
+This is an estimate for a six box, 24-spool setup based on prices I paid in June 2024.
 
 | Parts           | Net Cost |
 |-----------------|----------|
@@ -65,10 +69,11 @@ This is an estimate for a 24-spool, six box setup based on prices I paid in June
 | USB Cable       | $12      |
 | Molecular Sieve | $18      |
 | 20 qt Boxes     | $54      |
+| USB Cables      | $6       |
 | USB-C Breakouts | $5       |
 | Threaded Inserts| $8       |
 | Aluminum Tube   | $25      |
-| Total           | $163     |
+| Total           | $169     |
 
 ## Tools
 
