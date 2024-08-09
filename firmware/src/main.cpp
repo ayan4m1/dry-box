@@ -20,6 +20,8 @@
 #define DISCORD_ALERT_ICON "bangbang"
 #define DISCORD_ERROR_ICON "no_entry_sign"
 #define DISCORD_CLEAR_ICON "white_check_mark"
+#define DISCORD_PING_ICON "hourglass"
+#define DISCORD_STARTUP_ICON "sunny"
 #define DISCORD_MSG_BUFFER 64
 
 // start dynamic params
@@ -98,7 +100,19 @@ void sendMessage(const float humidity, const char* icon) {
   }
 }
 
-void pollSensor() {
+bool pollSensor() {
+  auto failed = sensor.get() != 0;
+
+  if (failed) {
+    Serial.println(F("Error polling sensor!"));
+    sendMessage(-1, nullptr);
+    return false;
+  }
+
+  return true;
+}
+
+void checkSensorState() {
   uint8_t alarmThreshold = atoi(humidityAlarmThreshold);
   uint8_t warningThreshold = atoi(humidityWarningThreshold);
 
@@ -107,9 +121,7 @@ void pollSensor() {
     return;
   }
 
-  if (sensor.get() != 0) {
-    Serial.println(F("Error polling sensor!"));
-    sendMessage(-1, nullptr);
+  if (!pollSensor()) {
     return;
   }
 
@@ -145,8 +157,8 @@ void setup() {
 
   Serial.println(F("Initialized"));
 
-  if (!manager->isConfigMode()) {
-    pollSensor();
+  if (!manager->isConfigMode() && pollSensor()) {
+    sendMessage(sensor.humidity, DISCORD_STARTUP_ICON);
   }
 }
 
@@ -159,5 +171,13 @@ void loop() {
     return;
   }
 
-  EVERY_N_SECONDS(pollingRate) { pollSensor(); }
+  EVERY_N_SECONDS(pollingRate) { checkSensorState(); }
+
+  EVERY_N_HOURS(24) {
+    if (!pollSensor()) {
+      return;
+    }
+
+    sendMessage(sensor.humidity, DISCORD_PING_ICON);
+  }
 }
