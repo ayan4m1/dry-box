@@ -167,6 +167,8 @@ void setup() {
   manager->begin(hostname.c_str());
   if (strlen(discordWebhookUrl) > 0) {
     webhook->begin(discordWebhookUrl);
+  } else {
+    Serial.println(F("Warning: Discord webhook URL is empty!"));
   }
 
   Serial.println(F("Initialized"));
@@ -181,17 +183,18 @@ void loop() {
 
   uint16_t pollingRate = atoi(sensorPollingRate);
 
-  if (pollingRate == 0 || manager->isConfigMode()) {
+  if (pollingRate == 0) {
+    Serial.println(
+        F("Warning: Polling rate is zero, no updates will be performed!"));
+  } else if (manager->isConfigMode()) {
     return;
   }
 
   EVERY_N_SECONDS(pollingRate) { checkSensorState(); }
 
   EVERY_N_HOURS(24) {
-    if (!pollSensor()) {
-      return;
+    if (pollSensor()) {
+      sendUpdateMessage(DISCORD_PING_ICON);
     }
-
-    sendUpdateMessage(DISCORD_PING_ICON);
   }
 }
