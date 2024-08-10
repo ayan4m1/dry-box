@@ -186,6 +186,7 @@ void loop() {
   if (pollingRate == 0) {
     Serial.println(
         F("Warning: Polling rate is zero, no updates will be performed!"));
+    return;
   } else if (manager->isConfigMode()) {
     return;
   }
