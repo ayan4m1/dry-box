@@ -84,19 +84,33 @@ String camelToSnake(const char* src) {
   return result;
 }
 
-void sendMessage(const float humidity, const char* icon) {
+void sendUpdateMessage(const char* icon) {
+  const float humidity = sensor.humidity;
   char message[DISCORD_MSG_BUFFER];
 
-  if (humidity > 0) {
-    sprintf(message, ":%s: %s is at %.2f%% humidity", icon, deviceName,
-            humidity);
-  } else {
-    sprintf(message, ":%s: %s has a sensor fault!", DISCORD_ERROR_ICON,
-            deviceName);
+  snprintf(message, DISCORD_MSG_BUFFER, ":%s: %s is at %.2f%% humidity", icon,
+           deviceName, humidity);
+
+  sendMessage(message);
+}
+
+void sendErrorMessage() {
+  char message[DISCORD_MSG_BUFFER];
+
+  snprintf(message, DISCORD_MSG_BUFFER, ":%s: %s has a sensor fault!",
+           DISCORD_ERROR_ICON, deviceName);
+
+  sendMessage(message);
+}
+
+void sendMessage(const char* message) {
+  if (strlen(discordWebhookUrl) <= 0) {
+    Serial.println(F("Invalid Discord webhook URL!"));
+    return;
   }
 
-  if (strlen(discordWebhookUrl) > 0) {
-    webhook->send(message);
+  if (!webhook->send(message)) {
+    Serial.println(F("Failed to trigger Discord webhook!"));
   }
 }
 
@@ -104,8 +118,8 @@ bool pollSensor() {
   auto failed = sensor.get() != 0;
 
   if (failed) {
-    Serial.println(F("Error polling sensor!"));
-    sendMessage(-1, nullptr);
+    Serial.println(F("Failed to poll sensor!"));
+    sendErrorMessage();
     return false;
   }
 
@@ -117,7 +131,7 @@ void checkSensorState() {
   uint8_t warningThreshold = atoi(humidityWarningThreshold);
 
   if (alarmThreshold == 0 || warningThreshold == 0) {
-    Serial.println(F("Invalid thresholds, skipping poll!"));
+    Serial.println(F("Invalid thresholds, skipping update!"));
     return;
   }
 
@@ -129,12 +143,12 @@ void checkSensorState() {
 
   if (sensor.humidity > alarmThreshold) {
     alarmTripped = true;
-    sendMessage(sensor.humidity, DISCORD_ALERT_ICON);
+    sendUpdateMessage(DISCORD_ALERT_ICON);
   } else if (sensor.humidity > warningThreshold) {
-    sendMessage(sensor.humidity, DISCORD_WARNING_ICON);
+    sendUpdateMessage(DISCORD_WARNING_ICON);
   } else if (alarmTripped) {
     alarmTripped = false;
-    sendMessage(sensor.humidity, DISCORD_CLEAR_ICON);
+    sendUpdateMessage(DISCORD_CLEAR_ICON);
   }
 }
 
@@ -158,7 +172,7 @@ void setup() {
   Serial.println(F("Initialized"));
 
   if (!manager->isConfigMode() && pollSensor()) {
-    sendMessage(sensor.humidity, DISCORD_STARTUP_ICON);
+    sendUpdateMessage(DISCORD_STARTUP_ICON);
   }
 }
 
@@ -178,6 +192,6 @@ void loop() {
       return;
     }
 
-    sendMessage(sensor.humidity, DISCORD_PING_ICON);
+    sendUpdateMessage(DISCORD_PING_ICON);
   }
 }
