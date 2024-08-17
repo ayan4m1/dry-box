@@ -84,6 +84,17 @@ String camelToSnake(const char* src) {
   return result;
 }
 
+void sendMessage(const char* message) {
+  if (strlen(discordWebhookUrl) <= 0) {
+    Serial.println(F("Invalid Discord webhook URL!"));
+    return;
+  }
+
+  if (!webhook->send(message)) {
+    Serial.println(F("Failed to trigger Discord webhook!"));
+  }
+}
+
 void sendUpdateMessage(const char* icon) {
   const float humidity = sensor.humidity;
   char message[DISCORD_MSG_BUFFER];
@@ -101,17 +112,6 @@ void sendErrorMessage() {
            DISCORD_ERROR_ICON, deviceName);
 
   sendMessage(message);
-}
-
-void sendMessage(const char* message) {
-  if (strlen(discordWebhookUrl) <= 0) {
-    Serial.println(F("Invalid Discord webhook URL!"));
-    return;
-  }
-
-  if (!webhook->send(message)) {
-    Serial.println(F("Failed to trigger Discord webhook!"));
-  }
 }
 
 bool pollSensor() {
