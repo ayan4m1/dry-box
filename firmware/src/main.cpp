@@ -16,12 +16,12 @@
 
 #define WIFI_PSK "drybox123"
 
-#define DISCORD_WARNING_ICON "warning"
-#define DISCORD_ALERT_ICON "bangbang"
+#define DISCORD_WARNING_ICON "yellow_circle"
+#define DISCORD_ALERT_ICON "red_circle"
 #define DISCORD_ERROR_ICON "no_entry_sign"
-#define DISCORD_CLEAR_ICON "white_check_mark"
+#define DISCORD_CLEAR_ICON "green_circle"
 #define DISCORD_PING_ICON "hourglass"
-#define DISCORD_STARTUP_ICON "sunny"
+#define DISCORD_STARTUP_ICON "tada"
 #define DISCORD_MSG_BUFFER 64
 
 // start dynamic params
