@@ -63,6 +63,11 @@ ESP_WiFiManager_Lite* manager = new ESP_WiFiManager_Lite();
 
 // start utility functions
 
+bool compareValues(float a, float b, float epsilon = 0.01f,
+                   bool greaterThan = true) {
+  return greaterThan ? fabs(a - b) > epsilon : fabs(a - b) < epsilon;
+}
+
 String camelToSnake(const char* src) {
   String input = String(src);
   String result = "";
@@ -141,10 +146,10 @@ void checkSensorState() {
 
   Serial.printf("Humidity is %.2f%%\n", sensor.humidity);
 
-  if (sensor.humidity > alarmThreshold) {
+  if (compareValues(alarmThreshold, sensor.humidity)) {
     alarmTripped = true;
     sendUpdateMessage(DISCORD_ALERT_ICON);
-  } else if (sensor.humidity > warningThreshold) {
+  } else if (compareValues(warningThreshold, sensor.humidity)) {
     sendUpdateMessage(DISCORD_WARNING_ICON);
   } else if (alarmTripped) {
     alarmTripped = false;
@@ -160,27 +165,30 @@ void setup() {
 
   // load the dynamic data we need to get the device name
   manager->extLoadDynamicData();
+  // Derive hostname from device name
   auto hostname = camelToSnake(deviceName);
   Serial.printf("Device name is %s\n", hostname.c_str());
 
+  // Configure WiFi params if we are going into AP mode
   manager->setConfigPortal(hostname, WIFI_PSK);
   manager->begin(hostname.c_str());
-  if (strlen(discordWebhookUrl) > 0) {
-    webhook->begin(discordWebhookUrl);
-  } else {
-    Serial.println(F("Warning: Discord webhook URL is empty!"));
-  }
+
+  // Initialize the Discord webhook lib
+  webhook->begin(discordWebhookUrl);
 
   Serial.println(F("Initialized"));
 
+  // Post a startup message if we are set up
   if (!manager->isConfigMode() && pollSensor()) {
     sendUpdateMessage(DISCORD_STARTUP_ICON);
   }
 }
 
 void loop() {
+  // Must be called once every loop()
   manager->run();
 
+  // Get polling rate from dynamic params
   uint16_t pollingRate = atoi(sensorPollingRate);
 
   if (pollingRate == 0) {
@@ -191,8 +199,10 @@ void loop() {
     return;
   }
 
+  // Sensor polling loop
   EVERY_N_SECONDS(pollingRate) { checkSensorState(); }
 
+  // Device healthcheck loop
   EVERY_N_HOURS(24) {
     if (pollSensor()) {
       sendUpdateMessage(DISCORD_PING_ICON);
