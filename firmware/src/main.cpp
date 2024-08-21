@@ -22,7 +22,7 @@
 #define DISCORD_CLEAR_ICON "green_circle"
 #define DISCORD_PING_ICON "hourglass"
 #define DISCORD_STARTUP_ICON "tada"
-#define DISCORD_MSG_BUFFER 64
+#define DISCORD_MSG_BUFFER 256
 
 // start dynamic params
 #define DEFAULT_DEVICE_NAME "Dry Box 1"
