@@ -75,7 +75,7 @@ String camelToSnake(const char* src) {
   char c = tolower(input[0]);
   result += char(c);
 
-  for (int i = 1; i < input.length(); i++) {
+  for (uint16_t i = 1; i < input.length(); i++) {
     c = input[i];
 
     if (isupper(c)) {
