@@ -65,7 +65,7 @@ ESP_WiFiManager_Lite* manager = new ESP_WiFiManager_Lite();
 
 bool compareValues(float a, float b, float epsilon = 0.01f,
                    bool greaterThan = true) {
-  return greaterThan ? fabs(a - b) > epsilon : fabs(a - b) < epsilon;
+  return greaterThan ? fabs(a - b) < epsilon : fabs(b - a) < epsilon;
 }
 
 String camelToSnake(const char* src) {
