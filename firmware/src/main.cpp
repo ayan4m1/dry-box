@@ -63,11 +63,6 @@ ESP_WiFiManager_Lite* manager = new ESP_WiFiManager_Lite();
 
 // start utility functions
 
-bool compareValues(float a, float b, float epsilon = 0.01f,
-                   bool greaterThan = true) {
-  return greaterThan ? fabs(a - b) < epsilon : fabs(b - a) < epsilon;
-}
-
 String camelToSnake(const char* src) {
   String input = String(src);
   String result = "";
@@ -146,10 +141,10 @@ void checkSensorState() {
 
   Serial.printf("Humidity is %.2f%%\n", sensor.humidity);
 
-  if (compareValues(alarmThreshold, sensor.humidity)) {
+  if (sensor.humidity >= alarmThreshold) {
     alarmTripped = true;
     sendUpdateMessage(DISCORD_ALERT_ICON);
-  } else if (compareValues(warningThreshold, sensor.humidity)) {
+  } else if (sensor.humidity >= warningThreshold) {
     sendUpdateMessage(DISCORD_WARNING_ICON);
   } else if (alarmTripped) {
     alarmTripped = false;
