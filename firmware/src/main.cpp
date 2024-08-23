@@ -68,6 +68,10 @@ bool areFloatsEqual(float a, float b, float epsilon = 0.01f) {
   return fabs(a - b) < epsilon;
 }
 
+float clampValue(float value, float epsilon = 0.01f) {
+  return roundf(sensor.humidity * (1 / epsilon)) / (1 / epsilon);
+}
+
 String camelToSnake(const char* src) {
   String input = String(src);
   String result = "";
@@ -144,17 +148,18 @@ void checkSensorState() {
     return;
   }
 
-  Serial.printf("Humidity is %.2f%%\n", sensor.humidity);
+  Serial.printf("Raw humidity is %.2f%%\n", sensor.humidity);
 
-  auto clamped = roundf(sensor.humidity * 100.0f) / 100.0f;
+  auto lastValue = clampValue(lastHumidity);
+  auto currentValue = clampValue(sensor.humidity);
 
-  if (areFloatsEqual(lastHumidity, clamped)) {
+  if (areFloatsEqual(lastValue, currentValue)) {
     Serial.println(F("Humidity value has not changed significantly!"));
     return;
   }
 
-  if (clamped >= warningThreshold) {
-    if (clamped >= alarmThreshold) {
+  if (currentValue >= warningThreshold) {
+    if (currentValue >= alarmThreshold) {
       Serial.println(F("Alarm tripped"));
       alarmTripped = true;
       sendUpdateMessage(DISCORD_ALERT_ICON);
