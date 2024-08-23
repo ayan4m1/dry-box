@@ -158,6 +158,8 @@ void checkSensorState() {
     return;
   }
 
+  lastHumidity = currentValue;
+
   if (currentValue >= warningThreshold) {
     if (currentValue >= alarmThreshold) {
       Serial.println(F("Alarm tripped"));
