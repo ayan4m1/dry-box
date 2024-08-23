@@ -57,11 +57,16 @@ uint16_t NUM_MENU_ITEMS = sizeof(myMenuItems) / sizeof(MenuItem);
 // end dynamic params
 
 SHT3X sensor;
+float lastHumidity = 0.0f;
 bool alarmTripped = false;
 Discord_Webhook* webhook = new Discord_Webhook();
 ESP_WiFiManager_Lite* manager = new ESP_WiFiManager_Lite();
 
 // start utility functions
+
+bool areFloatsEqual(float a, float b, float epsilon = 0.01f) {
+  return fabs(a - b) < epsilon;
+}
 
 String camelToSnake(const char* src) {
   String input = String(src);
@@ -110,7 +115,6 @@ void sendErrorMessage() {
 
   snprintf(message, DISCORD_MSG_BUFFER, ":%s: %s has a sensor fault!",
            DISCORD_ERROR_ICON, deviceName);
-
   sendMessage(message);
 }
 
@@ -130,7 +134,8 @@ void checkSensorState() {
   uint8_t alarmThreshold = atoi(humidityAlarmThreshold);
   uint8_t warningThreshold = atoi(humidityWarningThreshold);
 
-  if (alarmThreshold == 0 || warningThreshold == 0) {
+  if (alarmThreshold == 0 || warningThreshold == 0 ||
+      warningThreshold > alarmThreshold) {
     Serial.println(F("Invalid thresholds, skipping update!"));
     return;
   }
@@ -141,12 +146,23 @@ void checkSensorState() {
 
   Serial.printf("Humidity is %.2f%%\n", sensor.humidity);
 
-  if (sensor.humidity >= alarmThreshold) {
-    alarmTripped = true;
-    sendUpdateMessage(DISCORD_ALERT_ICON);
-  } else if (sensor.humidity >= warningThreshold) {
-    sendUpdateMessage(DISCORD_WARNING_ICON);
+  auto clamped = roundf(sensor.humidity * 100.0f) / 100.0f;
+
+  if (areFloatsEqual(lastHumidity, clamped)) {
+    Serial.println(F("Humidity value has not changed significantly!"));
+    return;
+  }
+
+  if (clamped >= warningThreshold) {
+    if (clamped >= alarmThreshold) {
+      Serial.println(F("Alarm tripped"));
+      alarmTripped = true;
+      sendUpdateMessage(DISCORD_ALERT_ICON);
+    } else {
+      sendUpdateMessage(DISCORD_WARNING_ICON);
+    }
   } else if (alarmTripped) {
+    Serial.println(F("Alarm reset"));
     alarmTripped = false;
     sendUpdateMessage(DISCORD_CLEAR_ICON);
   }
