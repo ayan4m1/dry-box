@@ -21,7 +21,6 @@
 #define DISCORD_ERROR_ICON "no_entry_sign"
 #define DISCORD_CLEAR_ICON "green_circle"
 #define DISCORD_PING_ICON "hourglass"
-#define DISCORD_STARTUP_ICON "tada"
 #define DISCORD_MSG_BUFFER 256
 
 // start dynamic params
@@ -197,8 +196,8 @@ void setup() {
   Serial.println(F("Initialized"));
 
   // Post a startup message if we are set up
-  if (!manager->isConfigMode() && pollSensor()) {
-    sendUpdateMessage(DISCORD_STARTUP_ICON);
+  if (!manager->isConfigMode()) {
+    checkSensorState();
   }
 }
 
