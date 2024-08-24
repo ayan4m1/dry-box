@@ -153,7 +153,7 @@ void checkSensorState() {
   auto lastValue = clampValue(lastHumidity);
   auto currentValue = clampValue(sensor.humidity);
 
-  if (areFloatsEqual(lastValue, currentValue)) {
+  if (!areFloatsEqual(lastValue, currentValue)) {
     Serial.println(F("Humidity value has not changed significantly!"));
     return;
   }
