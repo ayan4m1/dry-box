@@ -56,6 +56,7 @@ uint16_t NUM_MENU_ITEMS = sizeof(myMenuItems) / sizeof(MenuItem);
 // end dynamic params
 
 SHT3X sensor;
+uint16_t timesWarned = 0;
 float lastHumidity = 0.0f;
 bool alarmTripped = false;
 Discord_Webhook* webhook = new Discord_Webhook();
@@ -67,7 +68,7 @@ bool areFloatsEqual(float a, float b, float epsilon = 0.01f) {
   return fabs(a - b) < epsilon;
 }
 
-float clampValue(float value, float epsilon = 0.01f) {
+float clampValue(float value, float epsilon = 1.0f) {
   return roundf(sensor.humidity * (1 / epsilon)) / (1 / epsilon);
 }
 
@@ -147,7 +148,7 @@ void checkSensorState() {
     return;
   }
 
-  Serial.printf("Raw humidity is %.2f%%\n", sensor.humidity);
+  Serial.printf("Raw humidity is %.0f%%\n", sensor.humidity);
 
   auto lastValue = clampValue(lastHumidity);
   auto currentValue = clampValue(sensor.humidity);
@@ -161,15 +162,20 @@ void checkSensorState() {
 
   if (currentValue >= warningThreshold) {
     if (currentValue >= alarmThreshold) {
-      Serial.println(F("Alarm tripped"));
       alarmTripped = true;
+      Serial.println(F("Alarm tripped"));
       sendUpdateMessage(DISCORD_ALERT_ICON);
-    } else {
+    } else if (timesWarned < 10) {
+      timesWarned++;
       sendUpdateMessage(DISCORD_WARNING_ICON);
+    } else if (alarmTripped) {
+      sendMessage(":zzz: Sleeping warnings for now");
+      alarmTripped = false;
     }
   } else if (alarmTripped) {
     Serial.println(F("Alarm reset"));
     alarmTripped = false;
+    timesWarned = 0;
     sendUpdateMessage(DISCORD_CLEAR_ICON);
   }
 }
