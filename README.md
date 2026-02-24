@@ -46,7 +46,7 @@ These are for the sensor holders.
 
 ### [Sterilite 20 qt Boxes](https://www.amazon.com/Sterilite-19344304-Latched-Plastic-Container/dp/B002BA5F3O)
 
-Amazon currently offers 6, 12, 18, and 24 packs. If this listing becomes unavailable, try [Target](https://goto.ryukyu/sterilite-target), [Walmart](https://goto.ryukyu/sterilite-walmart), or [Home Depot](https://goto.ryukyu/sterilite-hd).
+Amazon currently offers 6, 12, 18, and 24 packs. If this listing becomes unavailable, try [Target](https://www.target.com/p/sterilite-20-qt-gasket-box-stackable-storage-bin-with-latching-lid-and-tight-seal-plastic-container-to-organize-basement-clear-base-and-lid-6-pack/-/A-76114127), [Walmart](https://www.walmart.com/ip/Sterilite-20-Quart-Clear-Plastic-Stacking-Storage-Container-with-Gasket-Lid-6-Pack/633637534), or [Home Depot](https://www.homedepot.com/p/Sterilite-20-Qt-Gasket-Box-with-Clear-Base-and-Lid-6-Pack-6-x-19324306/312922371).
 
 ### [3/8" Aluminum Tubing](https://www.amazon.com/Tubing-Aluminium-Refrigeration-Equipment-air-conditioning/dp/B0C43X6JR4)
 
