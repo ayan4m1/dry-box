@@ -62,33 +62,33 @@ The 2 pound size would provide for ~150 grams of sieve per box, in a six box set
 
 This is an estimate for a six box, 24-spool setup based on prices I paid in June 2024.
 
-| Parts           | Net Cost |
-|-----------------|----------|
-| D1 Mini         | $23      |
-| SHT30 Shield    | $18      |
-| USB Cable       | $12      |
-| Molecular Sieve | $18      |
-| 20 qt Boxes     | $54      |
-| USB Cables      | $6       |
-| USB-C Breakouts | $5       |
-| Threaded Inserts| $8       |
-| Aluminum Tube   | $25      |
-| Total           | $169     |
+| Parts            | Net Cost |
+| ---------------- | -------- |
+| D1 Mini          | $23      |
+| SHT30 Shield     | $18      |
+| USB Cable        | $12      |
+| Molecular Sieve  | $18      |
+| 20 qt Boxes      | $54      |
+| USB Cables       | $6       |
+| USB-C Breakouts  | $5       |
+| Threaded Inserts | $8       |
+| Aluminum Tube    | $25      |
+| Total            | $169     |
 
 ## Tools
 
- * Drill
- * CA glue
- * Glue Gun
- * Soldering Iron
- * Wire Strippers (12-24 AWG)
- * Belt Sander (or sandpaper and patience)
- * [M2 Threaded Insert Tip for Soldering Iron](https://www.amazon.com/Virtjoule-Heat-Insert-Tips-Sizes/dp/B08B17VQLD)
- * [3/8" Tubing Straightener](https://www.amazon.com/Watris-Veiyi-Straightener-Universal-Straightening/dp/B0BLYYPN91)
- * [Metal Tubing Cutter](https://www.amazon.com/RIDGID-32975-Quarters-Tubing-Cutter/dp/B000LDGNCU)
+- Drill
+- CA glue
+- Glue Gun
+- Soldering Iron
+- Wire Strippers (12-24 AWG)
+- Belt Sander (or sandpaper and patience)
+- [M2 Threaded Insert Tip for Soldering Iron](https://www.amazon.com/Virtjoule-Heat-Insert-Tips-Sizes/dp/B08B17VQLD)
+- [3/8" Tubing Straightener](https://www.amazon.com/Watris-Veiyi-Straightener-Universal-Straightening/dp/B0BLYYPN91)
+- [Metal Tubing Cutter](https://www.amazon.com/RIDGID-32975-Quarters-Tubing-Cutter/dp/B000LDGNCU)
 
 ## 3D Printed Parts
 
- * Endcaps for aluminum tubing
- * Dessicant tray
- * Sensor mount
+- Endcaps for aluminum tubing
+- Dessicant tray
+- Sensor mount
